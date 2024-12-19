@@ -206,5 +206,7 @@ void vlclua_fd_interrupt( vlclua_dtable_t * );
 void vlclua_fd_cleanup( vlclua_dtable_t * );
 struct vlc_interrupt *vlclua_set_interrupt( lua_State *L );
 
+int vlc_sd_probe_Open( vlc_object_t * );
+
 #endif /* VLC_LUA_H */
 
