@@ -1,6 +1,5 @@
 luadir = $(pluginsdir)/lua
-
-liblua_plugin_la_SOURCES = \
+commondeps = \
 	lua/extension.c lua/extension.h \
 	lua/extension_thread.c \
 	lua/intf.c \
@@ -35,11 +34,21 @@ liblua_plugin_la_SOURCES = \
 	lua/libs/renderers.c \
 	lua/libs/medialibrary.c
 
+liblua_plugin_la_SOURCES = $(commondeps)
+liblua_plugin_la_SOURCES += lua/plugin.c
+libextensionenabler_plugin_la_SOURCES = $(commondeps)
+libextensionenabler_plugin_la_SOURCES += lua/extensionenabler.c \
+																				 lua/extensionenabler.h
 if HAVE_WIN32
 liblua_plugin_la_SOURCES += lua/libs/win.c
+libextensionenabler_plugin_la_SOURCES += lua/libs/win.c
 endif
 liblua_plugin_la_CFLAGS = $(AM_CFLAGS) $(LUA_CFLAGS) -I$(srcdir)/lua
 liblua_plugin_la_LIBADD = $(LUA_LIBS) $(SOCKET_LIBS) $(LIBDL) $(LIBM)
+libextensionenabler_plugin_la_CFLAGS = $(AM_CFLAGS) $(LUA_CFLAGS) -I$(srcdir)/lua
+libextensionenabler_plugin_la_LIBADD = $(LUA_LIBS) $(SOCKET_LIBS) $(LIBDL) $(LIBM)
+
 if BUILD_LUA
 lua_LTLIBRARIES = liblua_plugin.la
+lua_LTLIBRARIES += libextensionenabler_plugin.la
 endif
