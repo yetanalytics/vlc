@@ -11,6 +11,7 @@
 #include <vlc_interface.h>
 #include <vlc_playlist.h>
 #include <vlc_modules.h>
+#include <vlc_dialog.h>
 
 #include "vlc.h"
 #include "extension.h"
@@ -79,6 +80,7 @@ static THREAD_FUNC CheckPlayerInitialization(void *data) {
             MUTEX_LOCK(init_ctx->lock);
             break;
         }
+
         MUTEX_LOCK(init_ctx->lock);
         if (time(NULL) - start_time >= TIMEOUT) {
             msg_Dbg(init_ctx->p_this, "Timeout elapsed, exiting thread.\n");
@@ -90,6 +92,31 @@ static THREAD_FUNC CheckPlayerInitialization(void *data) {
     free(init_ctx);
 
     return THREAD_FUNC_RET;
+}
+
+// **** dialog provider ****
+
+// Define the callback function for dialog updates
+static void MyDialogCallback(extension_dialog_t *p_ext_dialog, void *p_data)
+{
+    extension_activation_t *ctx = (extension_activation_t *)p_data;
+    if (!ctx || !ctx->p_this)
+        return;
+
+    // Example of updating or handling the dialog
+    msg_Dbg(ctx->p_this, "DialogCallback triggered for dialog %p", p_ext_dialog);
+
+    // Implement any specific logic for updating the dialog
+    // For instance, interacting with extension dialog members
+}
+
+// Initialize the dialog provider
+static int InitializeDialogProvider(vlc_object_t *p_this, extension_activation_t *ctx)
+{
+    vlc_dialog_provider_set_ext_callback(p_this, MyDialogCallback, ctx);
+
+    msg_Dbg(p_this, "Dialog provider initialized with callback.");
+    return VLC_SUCCESS;
 }
 
 
@@ -118,6 +145,12 @@ int Open_Enabler(vlc_object_t *p_this) {
             ctx->p_this = p_this;
             ctx->p_ext = p_ext;
             MUTEX_INIT(ctx->lock);
+
+            // Initialize dialog provider
+            if (InitializeDialogProvider(p_this, ctx) != VLC_SUCCESS) {
+              msg_Err(p_this, "Failed to initialize dialog provider.");
+              return VLC_EGENERIC;
+            }
             THREAD_HANDLE thread;
            
             msg_Dbg(p_this, "yielding extension activation to its own thread.");
